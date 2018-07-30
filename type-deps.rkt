@@ -36,9 +36,9 @@ xexpr = string
        (~> sym symbol->string without-namespace (equal? "element"))))
 
 (define (xexpr->edges schema)
-  ; Return a list of two-element list representing directed edges in the type
-  ; dependency graph of the specified schema, where '(A B) means that 'B is a
-  ; member of 'A.
+  ; Return a list of two-element lists representing directed edges in the type
+  ; dependency graph of the specified schema, where an edge '(A B) denotes that
+  ; 'B is a member of 'A.
   (generate-list
     (let loop ([current-type #f] 
                [xexpr schema])
