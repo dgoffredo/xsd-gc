@@ -1,3 +1,5 @@
+![xsd-gc](xsd-gc.png)
+
 `xsd-gc`
 ========
 Remove unused types from a schema.
