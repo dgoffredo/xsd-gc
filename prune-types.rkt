@@ -38,19 +38,18 @@ xexpr = string
   ; missing based on the return value of the specified predicate invoked with
   ; the descendant. When a child is elided, any leading whitespace before the
   ; removed element is also removed.
-  (let recur ([xexpr xexpr])
-    (match xexpr
-      [(list tag-name (list attributes ...) children ...)
-       `(,tag-name 
-         ,attributes 
-         ; Return the children (recursing on each), but if (keep? child) is
-         ; #f for any of them, remove it and any whitespace that precedes it.
-         ,@(~>> children
-             (map (lambda (child) (recur child)))
-             (remove-with-leading-whitespace
-               (lambda (child) (not (keep? child))))))]
-  
-      [otherwise otherwise])))
+  (match xexpr
+    [(list tag-name (list attributes ...) children ...)
+     `(,tag-name 
+       ,attributes 
+       ; Return the children (recursing on each), but if (keep? child) is #f
+       ; for any of them, remove it and any whitespace that precedes it.
+       ,@(~>> children
+           (map (lambda (child) (filter-children keep? child)))
+           (remove-with-leading-whitespace
+             (lambda (child) (not (keep? child))))))]
+
+    [otherwise otherwise]))
 
 (define (declared-type xexpr)
   ; Return the name of the type if the specified xexpr is a type definition.
