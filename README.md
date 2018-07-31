@@ -87,8 +87,6 @@ $ raco xsd-gc service.xsd
     </xs:restriction>
   </xs:simpleType>
 
-  
-
   <xs:simpleType name="WaterType">
     <xs:restriction base="xs:string">
       <xs:enumeration ext:id="0" value="FRESH"></xs:enumeration>

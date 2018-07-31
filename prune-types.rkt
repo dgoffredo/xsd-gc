@@ -5,6 +5,15 @@
 (require "type-util.rkt"
          threading)
 
+(define (whitespace? datum)
+  (and (string? datum) (regexp-match #px"\\s+" datum)))
+
+(define (remove-with-leading-whitespace what lst)
+  (match lst
+    [(list before ... (? whitespace? prefixes) (== what) after ...)
+     (remove-with-leading-whitespace what (append before after))]
+    [otherwise lst]))
+
 #| Keep in mind the xexpr grammar:
 
 xexpr = string
@@ -16,19 +25,34 @@ xexpr = string
       | misc
 |#
 
-(define (filter-children predicate xexpr)
+(define (filter-children keep? xexpr)
   ; Return a copy of the specified xexpr where any of its descendants may be
   ; missing based on the return value of the specified predicate invoked with
-  ; the descendant. #t -> keep, #f -> elide.
-  (match xexpr
-    [(list tag-name (list attributes ...) children ...)
-     `(,tag-name ,attributes ,@(filter predicate children))]
-
-    [otherwise otherwise]))
+  ; the descendant. When a child is elided, any leading whitespace before the
+  ; removed element is also removed.
+  (let ([removal-placeholder (gensym)]) ; ID to mark children for removal
+    (match xexpr
+      [(list tag-name (list attributes ...) children ...)
+       `(,tag-name 
+         ,attributes 
+         ; Return the children (recursing on each), but if (keep? child) is
+         ; #f for any of them, remove it and any whitespace that precedes it.
+         ; A removal happens by first replacing (mapping) the child with the
+         ; removal placeholder, and then later removing the placeholder with
+         ; any preceding whitespace.
+         ,@(remove-with-leading-whitespace
+             removal-placeholder
+             (map 
+               (lambda (child) (if (keep? child) child removal-placeholder))
+               (map (lambda (child) 
+                      (filter-children keep? child))
+                    children))))]
+  
+      [otherwise otherwise])))
 
 (define (declared-type xexpr)
-  ; Return the name of the type if the specified xexpr is a complexType
-  ; definition. Otherwise, return #f.
+  ; Return the name of the type if the specified xexpr is a type definition.
+  ; Otherwise, return #f.
   (match xexpr
     [(xsd-type name _ _) name]
     [_ #f]))
