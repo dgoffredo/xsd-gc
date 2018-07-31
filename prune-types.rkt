@@ -30,7 +30,7 @@ xexpr = string
   ; missing based on the return value of the specified predicate invoked with
   ; the descendant. When a child is elided, any leading whitespace before the
   ; removed element is also removed.
-  (let ([removal-placeholder (gensym)]) ; ID to mark children for removal
+  (let ([placeholder (gensym)]) ; ID to mark children for removal
     (match xexpr
       [(list tag-name (list attributes ...) children ...)
        `(,tag-name 
@@ -40,13 +40,10 @@ xexpr = string
          ; A removal happens by first replacing (mapping) the child with the
          ; removal placeholder, and then later removing the placeholder with
          ; any preceding whitespace.
-         ,@(remove-with-leading-whitespace
-             removal-placeholder
-             (map 
-               (lambda (child) (if (keep? child) child removal-placeholder))
-               (map (lambda (child) 
-                      (filter-children keep? child))
-                    children))))]
+         ,@(~>> children
+             (map (lambda (child) (filter-children keep? child)))
+             (map (lambda (child) (if (keep? child) child placeholder)))
+             (remove-with-leading-whitespace placeholder)))]
   
       [otherwise otherwise])))
 
