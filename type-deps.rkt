@@ -1,9 +1,10 @@
 #lang racket
 
-(provide xexpr->digraph)
+(provide xexpr->digraph
+         xexpr->edges)
 
-(require racket/generator
-         threading
+(require "type-util.rkt"
+         racket/generator
          graph
          xml)
 
@@ -22,19 +23,6 @@ xexpr = string
       | misc
 |#
 
-(define (without-namespace str)
-  (match (string-split str ":")
-    [(list namespace name) name]
-    [(list           name) name]))
-
-(define (complex-type-tag? sym)
-  (and (symbol? sym)
-       (~> sym symbol->string without-namespace (equal? "complexType"))))
-
-(define (element-tag? sym)
-  (and (symbol? sym)
-       (~> sym symbol->string without-namespace (equal? "element"))))
-
 (define (xexpr->edges schema)
   ; Return a list of two-element lists representing directed edges in the type
   ; dependency graph of the specified schema, where an edge '(A B) denotes that
@@ -47,8 +35,7 @@ xexpr = string
           "In loop with current-type ~a and xexpr ~e" current-type xexpr))
       (match xexpr
         ; new type
-        [(list (? complex-type-tag? _) (list-no-order `(name ,name) _ ...)
-           children ...)
+        [(xsd-complex-type name _ children)
   
          (for ([child children])
            (loop name child))]
