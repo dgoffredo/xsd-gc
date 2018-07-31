@@ -10,8 +10,15 @@
 
 (define (remove-with-leading-whitespace what lst)
   (match lst
-    [(list before ... (? whitespace? prefixes) (== what) after ...)
+    ; Has what we want to remove, and leading whitespace.
+    [(list before ... (? whitespace? _) (== what) after ...)
      (remove-with-leading-whitespace what (append before after))]
+
+    ; Has what we want to remove, without leading whitespace.
+    [(list before ... (== what) after ...)
+     (remove-with-leading-whitespace what (append before after))]
+
+    ; Doesn't have what we want to remove.
     [otherwise lst]))
 
 #| Keep in mind the xexpr grammar:
