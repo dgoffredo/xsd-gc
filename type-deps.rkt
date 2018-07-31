@@ -23,6 +23,29 @@ xexpr = string
       | misc
 |#
 
+(define (xexpr->vertices schema)
+  ; Return a list of strings representing vertices in the type dependency
+  ; graph of the specified schema, where each vertex is a type name.
+  (generate-list
+    (let loop ([xexpr schema])
+      (match xexpr
+        ; new type, possibly with children
+        [(xsd-type name _ children)
+  
+         (yield name)
+         (for ([child children])
+           (loop child))]
+  
+        ; other node, possibly with children
+        [(list _ (list (list _ _) ...)
+           children ...)
+  
+         (for ([child children])
+           (loop child))]
+
+        ; scalar
+        [else (void)]))))
+
 (define (xexpr->edges schema)
   ; Return a list of two-element lists representing directed edges in the type
   ; dependency graph of the specified schema, where an edge '(A B) denotes that
@@ -30,9 +53,6 @@ xexpr = string
   (generate-list
     (let loop ([current-type #f] 
                [xexpr schema])
-      #;(displayln 
-        (format 
-          "In loop with current-type ~a and xexpr ~e" current-type xexpr))
       (match xexpr
         ; new type
         [(xsd-complex-type name _ children)
@@ -44,7 +64,7 @@ xexpr = string
         [(list (? element-tag? _) (list-no-order `(type ,element-type) _ ...)
            children ...)
   
-          (yield (list current-type element-type))]
+          (yield (list current-type (without-namespace element-type)))]
   
         ; other node
         [(list _ (list (list _ _) ...)
@@ -59,4 +79,10 @@ xexpr = string
 (define (xexpr->digraph schema)
   ; Return a directed-graph where a directed edge from A to B indicates that
   ; B is a member of A.
-  (directed-graph (xexpr->edges schema)))
+  (let ([graph (directed-graph (xexpr->edges schema))])
+    ; Explicitly add vertices (mostly redundantly) to incorporate any isolated
+    ; vertices.
+    (for ([vertex (xexpr->vertices schema)])
+      (add-vertex! graph vertex))
+
+    graph))

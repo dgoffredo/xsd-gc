@@ -6,12 +6,13 @@
          "xsd-gc.rkt")
 
 (match (parse-options (current-command-line-arguments))
-  [(options in-place? anchored-types input-paths)
+  [(options in-place? debug? anchored-types input-paths)
 
    (define (from-current-input)
      (xsd-gc (current-input-port)
              (current-output-port)
-             anchored-types))
+             anchored-types
+             debug?))
 
    (if (empty? input-paths)
      (from-current-input)
@@ -26,9 +27,11 @@
             (lambda (out tmp-path)
               (xsd-gc (open-input-file input-path) 
                       out 
-                      anchored-types)))]
+                      anchored-types
+                      debug?)))]
     
          [else
           (xsd-gc (open-input-file input-path)
                   (current-output-port) 
-                  anchored-types)])))])
+                  anchored-types
+                  debug?)])))])
