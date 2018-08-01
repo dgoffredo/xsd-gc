@@ -64,12 +64,12 @@ xexpr = string
     to-remove))
 
 (define (xsd-gc in-string out-port root-types [debug? #f])
-  ; Read an XSD from the specified input port and remove from it all types not
+  ; Parse an XSD from the specified string and remove from it all types not
   ; accessible by traversing the member trees of each of the specified root
   ; types. If root types is #f, then deduce them from the "requestType" and
   ; "responseType" attributes of the schema. Write the resulting XSD to the
-  ; specified output port. If the optionally specified debugging flag is
-  ; not #f, print intermediate results to the current error port.
+  ; specified output port. If the optionally specified debugging flag is not
+  ; #f, print intermediate results to the current error port.
   (match (read-xml (open-input-string in-string))
     [(document prolog element extra)
      (debug-let* debug? 
