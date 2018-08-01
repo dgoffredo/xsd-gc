@@ -2,8 +2,9 @@
 
 (provide xsd-gc)
 
-(require "mark-and-sweep.rkt"
-         "prune-types.rkt"
+(require "copy-with-cuts.rkt"
+         "document-util.rkt"
+         "mark-and-sweep.rkt"
          "type-deps.rkt"
          "type-util.rkt"
          graph
@@ -51,36 +52,36 @@ xexpr = string
       value)
     form))
 
-(define (remove-unused-types xexpr root-types [debug? #f])
-  ; Treating the specified xexpr as an XSD, return a copy of the schema having
-  ; removed from it the definitions of types that are not visible by
+(define-syntax-rule (debug-let* debug? ([name form] ...) body ...)
+  (let* ([name (if debug?
+                 (let ([value form])
+                   (displayln (~a 'name ": " (~s value)) (current-error-port))
+                   value)
+                 form)] ...)
+    body ...))
+
+(define (types-to-remove xexpr root-types [debug? #f])
+  ; Return the names of types in the specified schema that are not visible by
   ; traversing the member trees of each of the specified root types. If the
   ; optionally specified debugging flag is not #f, print intermediate results
   ; to the current error port.
-    (let* ([graph           (echo debug? (xexpr->digraph xexpr))]
-           [types-to-remove (echo debug? (mark-and-sweep* graph root-types))])
-      (when debug?
-        (displayln (~a "graph edges: " (~s (get-edges graph))))
-        (displayln (~a "graph vertices: " (~s (get-vertices graph)))))
+  (debug-let* debug?
+              ([graph     (xexpr->digraph xexpr)]
+               [to-remove (mark-and-sweep* graph root-types)])
+    to-remove))
 
-      (prune-types xexpr types-to-remove)))
-
-(define (xsd-gc in out root-types [debug? #f])
+(define (xsd-gc in-string out-port root-types [debug? #f])
   ; Read an XSD from the specified input port and remove from it all types not
   ; accessbile by traversing the member trees of each of the specified root
   ; types. If root types is #f, then deduce them from the "requestType" and
   ; "responseType" attributes of the schema. Write the resulting XSD to the
   ; specified output port. If the optionally specified debugging flag is
   ; not #f, print intermediate results to the current error port.
-  (match (read-xml in)
+  (match (read-xml (open-input-string in-string))
     [(document prolog element extra)
-     (let* ([xexpr  (xml->xexpr element)]
-            [roots  (or root-types (request/response-types xexpr))]
-            [result (xexpr->xml (remove-unused-types xexpr roots debug?))])
-       (when debug?
-         #;(displayln (~a "parsed xexpr: " (xexpr->string xexpr))
-           (current-error-port))
-         (displayln (~a "root types: " (~s roots))
-           (current-error-port)))
-
-       (write-xml (document prolog result extra) out))]))
+     (debug-let* debug? 
+                 ([xexpr      (xml->xexpr element)]
+                  [roots      (or root-types (request/response-types xexpr))]
+                  [dead-types (types-to-remove xexpr roots debug?)]
+                  [cuts       (get-cuts (element-content element) dead-types)])
+       (copy-with-cuts cuts (open-input-string in-string) out-port))]))

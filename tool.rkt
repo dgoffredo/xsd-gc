@@ -9,7 +9,7 @@
   [(options in-place? debug? anchored-types input-paths)
 
    (define (from-current-input)
-     (xsd-gc (current-input-port)
+     (xsd-gc (port->string (current-input-port))
              (current-output-port)
              anchored-types
              debug?))
@@ -25,13 +25,13 @@
           (call-with-atomic-output-file
             input-path
             (lambda (out tmp-path)
-              (xsd-gc (open-input-file input-path) 
+              (xsd-gc (port->string (open-input-file input-path))
                       out 
                       anchored-types
                       debug?)))]
     
          [else
-          (xsd-gc (open-input-file input-path)
+          (xsd-gc (port->string (open-input-file input-path))
                   (current-output-port) 
                   anchored-types
                   debug?)])))])
