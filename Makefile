@@ -4,7 +4,7 @@ SOURCES = $(shell find . -type f -name '*.rkt')
 
 $(BUILD_DIR)/bin/xsd-gc: $(SOURCES)
 	mkdir -p $(BUILD_DIR)
-	raco exe -o $(BUILD_DIR)/xsd-gc info.rkt
+	raco exe -o $(BUILD_DIR)/xsd-gc tool.rkt
 	raco distribute $(BUILD_DIR) $(BUILD_DIR)/xsd-gc
 	rm $(BUILD_DIR)/xsd-gc
 
