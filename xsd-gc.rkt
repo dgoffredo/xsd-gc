@@ -45,13 +45,6 @@ xexpr = string
                      "does not name the requestType or the responseType as an"
                      "attribute.")))]))
 
-(define-syntax-rule (echo debug? form)
-  (if debug?
-    (let ([value form])
-      (displayln (~a 'form ": " value) (current-error-port))
-      value)
-    form))
-
 (define-syntax-rule (debug-let* debug? ([name form] ...) body ...)
   (let* ([name (if debug?
                  (let ([value form])

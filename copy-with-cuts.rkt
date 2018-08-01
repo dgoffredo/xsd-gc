@@ -25,7 +25,6 @@
   ; intervals denoted by the specified list of cuts, where each cut is a
   ; `(list from to)`, where `from` is the offset to the first character to
   ; remove and `to` is one plus the offset of the last character to remove.
-
   (define (copy [amount #f])
     (if amount
       (copy-port* in out amount)
