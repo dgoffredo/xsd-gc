@@ -5,33 +5,37 @@
 (require "options.rkt"
          "xsd-gc.rkt")
 
-(match (parse-options (current-command-line-arguments))
-  [(options in-place? debug? anchored-types input-paths)
+(define (run)
+  (match (parse-options (current-command-line-arguments))
+    [(options in-place? debug? anchored-types input-paths)
+  
+     (define (from-current-input)
+       (xsd-gc (port->string (current-input-port))
+               (current-output-port)
+               anchored-types
+               debug?))
+  
+     (if (empty? input-paths)
+       (from-current-input)
+       (for ([input-path input-paths])
+         (cond
+           [(equal? input-path "-")
+            (from-current-input)]
+      
+           [in-place?
+            (call-with-atomic-output-file
+              input-path
+              (lambda (out tmp-path)
+                (xsd-gc (port->string (open-input-file input-path))
+                        out 
+                        anchored-types
+                        debug?)))]
+      
+           [else
+            (xsd-gc (port->string (open-input-file input-path))
+                    (current-output-port) 
+                    anchored-types
+                    debug?)])))]))
 
-   (define (from-current-input)
-     (xsd-gc (port->string (current-input-port))
-             (current-output-port)
-             anchored-types
-             debug?))
-
-   (if (empty? input-paths)
-     (from-current-input)
-     (for ([input-path input-paths])
-       (cond
-         [(equal? input-path "-")
-          (from-current-input)]
-    
-         [in-place?
-          (call-with-atomic-output-file
-            input-path
-            (lambda (out tmp-path)
-              (xsd-gc (port->string (open-input-file input-path))
-                      out 
-                      anchored-types
-                      debug?)))]
-    
-         [else
-          (xsd-gc (port->string (open-input-file input-path))
-                  (current-output-port) 
-                  anchored-types
-                  debug?)])))])
+(module+ run-tool
+  (run))

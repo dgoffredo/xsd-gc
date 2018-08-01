@@ -1,2 +1,5 @@
 # Racket compilation artifacts
 **/compiled/
+
+# Build artifacts
+build/
