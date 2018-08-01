@@ -37,5 +37,5 @@
                     anchored-types
                     debug?)])))]))
 
-(module+ run-tool
+(module+ main
   (run))

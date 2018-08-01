@@ -56,12 +56,13 @@ xexpr = string
       (match xexpr
         ; new type
         [(xsd-complex-type name _ children)
-  
+
          (for ([child children])
            (loop name child))]
   
         ; type element
-        [(list (? element-tag? _) (list-no-order `(type ,element-type) _ ...)
+        [(list (? element-tag? _)
+           (list-no-order (list (or 'type 'ref) element-type) _ ...)
            children ...)
   
           (yield (list current-type (without-namespace element-type)))]

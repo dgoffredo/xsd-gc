@@ -18,15 +18,15 @@
   ; to the specified `from` and `to`, respectively.
   (syntax-rules ()
     [(type-to-remove remove? from to)
-     (...                                      ; treat ellipses literally
-       (element                                ; type definition
-         (location _ _ from)                   ; character offset of beginning
-         (location _ _ to)                     ; character offset just past end
-         (? type-tag? _)                       ; /(\w+:)?(complex|simple)Type/
-         (list-no-order                        ; attributes
-           (attribute _ _ 'name (? remove? _)) ; name matches a type to remove
-           _ ...)                              ; remaining attributes
-         _))]))                                ; children of type definition
+     (...                                        ; treat ellipses literally
+       (element                                  ; type definition
+         (location _ _ from)                     ; char offset of beginning
+         (location _ _ to)                       ; char offset just past end
+         (or (? type-tag? _) (? element-tag? _)) ; type or element
+         (list-no-order                          ; attributes
+           (attribute _ _ 'name (? remove? _))   ; name matches a removed type
+           _ ...)                                ; remaining attributes
+         _))]))                                  ; children of type definition
 
 (define (get-cuts content types-to-remove)
   ; Return a list of `(list from to)`, each representing a half open range of
