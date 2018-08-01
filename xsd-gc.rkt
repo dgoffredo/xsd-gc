@@ -66,7 +66,7 @@ xexpr = string
   ; optionally specified debugging flag is not #f, print intermediate results
   ; to the current error port.
   (debug-let* debug?
-              ([graph     (xexpr->digraph xexpr)]
+              ([graph     (xexpr->digraph xexpr debug?)]
                [to-remove (mark-and-sweep* graph root-types)])
     to-remove))
 

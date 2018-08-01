@@ -77,13 +77,19 @@ xexpr = string
         ; scalar
         [else (void)]))))
 
-(define (xexpr->digraph schema)
+(define (xexpr->digraph schema [debug? #f])
   ; Return a directed-graph where a directed edge from A to B indicates that
-  ; B is a member of A.
+  ; B is a member of A. If the optionally specified debugging flag is not #f,
+  ; print the vertices and edges of the returned graph to the current error
+  ; port.
   (let ([graph (directed-graph (xexpr->edges schema))])
     ; Explicitly add vertices (mostly redundantly) to incorporate any isolated
     ; vertices.
     (for ([vertex (xexpr->vertices schema)])
       (add-vertex! graph vertex))
+
+    (when debug?
+      (displayln (~a "vertices: " (get-vertices graph)) (current-error-port))
+      (displayln (~a "edges: "    (get-edges    graph)) (current-error-port)))
 
     graph))
