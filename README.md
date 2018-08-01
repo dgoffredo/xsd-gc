@@ -64,37 +64,17 @@ $ cat service.xsd
 </xs:schema>
 ```
 ```console
-$ raco xsd-gc service.xsd
+$ diff service.xsd <(raco xsd-gc service.xsd)
 ```
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<xs:schema ext:requestType="SomeChoice" ext:responseType="SomeChoice" xmlns:ext="http://www.foo.com/extensions" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-
-  <xs:complexType name="SomeChoice">
-    <xs:choice>
-      <xs:element name="foo" type="xs:decimal"></xs:element>
-      <xs:element name="bar" type="xs:string"></xs:element>
-      <xs:element name="baz" type="Color"></xs:element>
-      <xs:element name="water" type="WaterType"></xs:element>
-    </xs:choice>
-  </xs:complexType>
-
-  <xs:simpleType name="Color">
-    <xs:restriction base="xs:string">
-      <xs:enumeration ext:id="0" value="RED"></xs:enumeration>
-      <xs:enumeration ext:id="1" value="GREEN"></xs:enumeration>
-      <xs:enumeration ext:id="2" value="BLUE"></xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="WaterType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration ext:id="0" value="FRESH"></xs:enumeration>
-      <xs:enumeration ext:id="1" value="SALT"></xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-
-</xs:schema>
+```diff
+24,30d23
+<   <xs:complexType name="Fish">
+<     <xs:sequence>
+<       <xs:element name="kind" type="WaterType"/>
+<       <xs:element name="name" type="xs:string"/>
+<     </xs:sequence>
+<   </xs:complexType>
+< 
 ```
 No more fish.
 
@@ -105,6 +85,13 @@ $ raco pkg install
 
 More
 ----
+### Options
+| Option                        | Description                                 |
+| ------                        | -----------                                 |
+| `-d`, `--debug`               | print intermediate values to standard error |
+| `-i`, `--in-place`            | write result directly to the input file     |
+| `-a`, `--anchor` `<type>`     | do not remove `<type>` and its dependencies |
+
 ### Namespaces
 To keep the code simple, `xsd-gc` ignores all namespaces. This means that if
 a schema refers to types in different namespaces that otherwise have the same
