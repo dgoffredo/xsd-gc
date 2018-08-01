@@ -4,6 +4,7 @@
          xsd-complex-type
          without-namespace 
          complex-type-tag? 
+         element-tag?
          member-tag?
          simple-type-tag?
          type-tag?)
@@ -22,10 +23,9 @@
 
 (define-tag-predicate simple-type-tag?  '("simpleType"))
 (define-tag-predicate complex-type-tag? '("complexType"))
+(define-tag-predicate type-tag?         '("complexType" "simpleType"))
+(define-tag-predicate element-tag?      '("element"))
 (define-tag-predicate member-tag?       '("element" "attribute"))
-
-(define (type-tag? sym)
-  (or (complex-type-tag? sym) (simple-type-tag? sym)))
 
 (define-match-expander xsd-type-node
   (syntax-rules ()
