@@ -22,7 +22,7 @@
        (element                                  ; type definition
          (location _ _ from)                     ; char offset of beginning
          (location _ _ to)                       ; char offset just past end
-         (or (? type-tag? _) (? element-tag? _)) ; type or element
+         (or (? type-tag? _) (? member-tag? _)) ; type or element
          (list-no-order                          ; attributes
            (attribute _ _ 'name (? remove? _))   ; name matches a removed type
            _ ...)                                ; remaining attributes

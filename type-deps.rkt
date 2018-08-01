@@ -61,7 +61,7 @@ xexpr = string
            (loop name child))]
   
         ; type element
-        [(list (? element-tag? _)
+        [(list (? member-tag? _)
            (list-no-order (list (or 'type 'ref) element-type) _ ...)
            children ...)
   

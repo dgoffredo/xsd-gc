@@ -4,7 +4,7 @@
          xsd-complex-type
          without-namespace 
          complex-type-tag? 
-         element-tag?
+         member-tag?
          simple-type-tag?
          type-tag?)
 
@@ -15,14 +15,14 @@
     [(list namespace name) name]
     [(list           name) name]))
 
-(define-syntax-rule (define-tag-predicate predicate-name tag-name)
+(define-syntax-rule (define-tag-predicate predicate-name tag-names)
   (define (predicate-name sym)
     (and (symbol? sym)
-        (~> sym symbol->string without-namespace (equal? tag-name)))))
+        (~> sym symbol->string without-namespace (member tag-names)))))
 
-(define-tag-predicate simple-type-tag?  "simpleType")
-(define-tag-predicate complex-type-tag? "complexType")
-(define-tag-predicate element-tag?      "element")
+(define-tag-predicate simple-type-tag?  '("simpleType"))
+(define-tag-predicate complex-type-tag? '("complexType"))
+(define-tag-predicate member-tag?       '("element" "attribute"))
 
 (define (type-tag? sym)
   (or (complex-type-tag? sym) (simple-type-tag? sym)))
@@ -39,7 +39,7 @@
            children-id ...)
 
          ; Or it's the complex/simple type tag as a child of an element tag.
-         (list (? element-tag? _)
+         (list (? member-tag? _)
                (list-no-order `(name ,name-id) _ ...)
             _ ...         ; children preceding the type (annotation?)
             ; the type
