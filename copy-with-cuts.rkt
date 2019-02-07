@@ -37,6 +37,13 @@
     (match cuts
       ['() (copy)]                    ; No cuts remain, so copy the rest.
       [(list (list from to) tail ...) ; Peel off a cut and process it, recur...
-       (copy (- from offset))
-       (ignore (- to from))
-       (recur tail to)])))
+
+       ; Important: The "offset" in the xml module's "location" struct is _not_
+       ; an offset. Instead, it's a one-based character index. So, subtract `1`
+       ; from each of `from` and `to` for actual offsets (index _difference_
+       ; between the indicated character and the first character).
+       (let ([from (- from 1)] [to (- to 1)])
+
+         (copy (- from offset))
+         (ignore (- to from))
+         (recur tail to))])))
